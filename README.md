@@ -28,7 +28,7 @@ This project is a monorepo managed with **Turborepo**.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/adith2005-20/bithub.git](https://github.com/adith2005-20/bithub.git)
+    git clone https://github.com/adith2005-20/bithub.git
     cd bithub
     ```
 2.  **Install dependencies:**
