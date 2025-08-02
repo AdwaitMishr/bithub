@@ -24,7 +24,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
       socket.send(
         JSON.stringify({
           type: "join_room",
-          payload: { roomId: "main-floor" },
+          payload: { roomId: "main-floor" }, //placeholder
         }),
       );
     };

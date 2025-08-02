@@ -1,33 +1,46 @@
-import {WebSocket} from 'ws';
+import { WebSocket } from 'ws';
 import { joinRoom, leaveRoom } from './rooms';
 import { handleChatMessage } from './handlers/chatHandler';
+// ... other handlers
 
+export function handleConnection(ws: any) {
+  console.log('A new client connected!');
 
-export function handleConnection(ws: WebSocket){
-    console.log('New client connection');
+  ws.on('message', (rawMessage:any) => {
+    try {
+      const { type, payload } = JSON.parse(rawMessage.toString());
 
-    ws.on('message',(rawMessage)=>{
-        try{
-            const {type, payload} = JSON.parse(rawMessage.toString());
+      // The 'join_room' message is special and must be handled first
+      if (type === 'join_room' && payload.roomId && payload.playerId) {
+        joinRoom(ws, payload.roomId, payload.playerId);
+        return; // Done with this message
+      }
 
-            switch(type){
-                case 'join_room':
-                    joinRoom(ws,payload.roomId);
-                    break;
-                case 'chat_message':
-                    handleChatMessage(ws,payload);
-                    break;
-                //add update_position route next
+      // For all other messages, first verify the client has joined a room
+      if (!ws.playerId || !ws.roomId) {
+        console.warn('Ignoring message from a client that has not joined a room.');
+        return;
+      }
 
-                default:
-                    console.log('Unknown message type. Please retry');
-            }
-        }
-        catch(error){
-            console.error('Failed to parse message or invalid message format.');
-        }
-    })
-    ws.on('close',()=>{
-        leaveRoom(ws);
-    })
+      // Now that we know the client is authenticated, route their message
+      switch (type) {
+        case 'chat_message':
+          handleChatMessage(ws, payload);
+          break;
+        
+        // case 'move_intent':
+        //   handleMoveIntent(ws, payload);
+        //   break;
+
+        default:
+          console.log(`Unknown message type: ${type}`);
+      }
+    } catch (error) {
+      console.error('Failed to parse message or invalid message format.');
+    }
+  });
+
+  ws.on('close', () => {
+    leaveRoom(ws);
+  });
 }
