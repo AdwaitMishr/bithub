@@ -4,6 +4,7 @@ import { db } from "@/server/db"; // your drizzle instance
 import { env } from "@/env";
 import {cache} from "react"
 import {headers} from "next/headers"
+import {username} from "better-auth/plugins/username"
  
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -21,7 +22,12 @@ export const auth = betterAuth({
           maxAge: 5 * 60,
         },
     },
-    
+    plugins: [ 
+        username({
+            minUsernameLength: 3,
+            maxUsernameLength: 16
+        }) 
+    ]
 });
 
 export const getSession = cache(async () => {

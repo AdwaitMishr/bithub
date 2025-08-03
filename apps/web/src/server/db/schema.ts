@@ -33,6 +33,8 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
+  username: text("username").unique(),
+  displayUsername: text("display_username"),
 });
 
 export const session = pgTable("session", {
@@ -80,54 +82,3 @@ export const verification = pgTable("verification", {
 });
 
 export const createTable = pgTableCreator((name) => `bithub_${name}`);
-
-export const posts = createTable(
-  "post",
-  (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
-    createdAt: d
-      .timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
-  }),
-  (t) => [index("name_idx").on(t.name)],
-);
-
-export const rooms = createTable(
-  "room",
-  (d) => ({
-    id: d.text("id").primaryKey(),
-    code: d.text("code").unique().notNull(),
-    status: d.text("status", { enum: ["active", "inactive"] }).default("active").notNull(),
-    maxPlayers: d.integer("max_players").default(6).notNull(),
-    createdAt: d.timestamp("created_at").defaultNow().notNull(),
-    updatedAt: d.timestamp("updated_at").defaultNow().notNull(),
-    type: d.text("type", { enum: ["office", "arcade"] }).default("office").notNull(),
-    visibility: d.text("visibility", { enum: ["public", "private"] }).default("public").notNull(),
-    password: d.text("password").notNull(), 
-  })
-);
-
-export const players = createTable(
-  "player",
-  (d) => ({
-    id: d.text("id").primaryKey(),
-    x: d.integer("x").default(0).notNull(), 
-    y: d.integer("y").default(0).notNull(),
-    
-    userId: d.text("user_id").references(() => user.id, { onDelete: "cascade" }),
-    
-
-    roomId: d.text("room_id").references(() => rooms.id, { onDelete: "cascade" }),
-    
-    createdAt: d.timestamp("created_at").defaultNow().notNull(),
-    updatedAt: d.timestamp("updated_at").defaultNow().notNull(),
-  })
-);
-
-export type Room = typeof rooms.$inferSelect;
-export type NewRoom = typeof rooms.$inferInsert;
-export type Player = typeof players.$inferSelect;
-export type NewPlayer = typeof players.$inferInsert;
