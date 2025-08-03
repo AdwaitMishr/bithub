@@ -1,7 +1,8 @@
 import { WebSocket } from 'ws';
-import { joinRoom, leaveRoom } from './rooms';
+import { handleJoinRoom, leaveRoom } from './rooms';
 import { handleChatMessage } from './handlers/chatHandler';
-// ... other handlers
+import { relaySignal } from './handlers/webrtcHandler';
+
 
 export function handleConnection(ws: any) {
   console.log('A new client connected!');
@@ -12,7 +13,7 @@ export function handleConnection(ws: any) {
 
       // The 'join_room' message is special and must be handled first
       if (type === 'join_room' && payload.roomId && payload.playerId) {
-        joinRoom(ws, payload.roomId, payload.playerId);
+        handleJoinRoom(ws, payload);
         return; // Done with this message
       }
 
@@ -27,7 +28,9 @@ export function handleConnection(ws: any) {
         case 'chat_message':
           handleChatMessage(ws, payload);
           break;
-        
+        case 'webrtc_signal':
+          relaySignal(ws.playerId, payload)
+          break;
         // case 'move_intent':
         //   handleMoveIntent(ws, payload);
         //   break;
