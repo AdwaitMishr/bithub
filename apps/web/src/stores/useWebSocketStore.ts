@@ -45,7 +45,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       const {peerQueue, addPeer} = get();
 
       if(peerQueue.length>0){
-        console.log(`Processing ${peerQueue.length} queued peer connections.`);
         peerQueue.forEach(req=>addPeer(req.targetId, req.initiator));
         set({peerQueue:[]});
       }
@@ -56,20 +55,13 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   },
   addPeer: (targetId, initiator)=>{
     const { localStream, ws, myPlayerId } = get();
-
-    // --- Start of Debugging Logs ---
-    console.log(`Attempting to add peer: ${targetId}`);
     if (!localStream) {
-      console.log(`localStream not ready, queueing peer connection for ${targetId}`);
       set(state => ({ peerQueue: [...state.peerQueue, { targetId, initiator }] }));
       return;
     }
     if (!ws || !myPlayerId) {
-      console.error("DEBUG: Cannot add peer, ws or myPlayerId is missing.");
       return;
     }
-    console.log("DEBUG: All checks passed, creating SimplePeer instance.");
-    // --- End of Debugging Logs ---
 
     const peer = new SimplePeer({
       initiator: initiator,
@@ -120,7 +112,6 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const socket = new WebSocket('ws://localhost:8080');
 
     socket.onopen = () => {
-      console.log('WebSocket Connected (Zustand)');
       const newPlayerId = 'user-' + Math.random().toString(16).slice(2);
       set({ isConnected: true, myPlayerId: newPlayerId }); // Set the user's ID
       socket.send(
