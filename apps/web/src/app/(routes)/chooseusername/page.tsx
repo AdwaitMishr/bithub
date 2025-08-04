@@ -28,7 +28,7 @@ const Page = () => {
         setIsPending(false);
     }
   return (
-    <div className='flex-col gap-x-4 justify-center items-center align-middle mx-auto p-8 mt-24'>
+    <div className='flex-col gap-x-4 justify-center items-center align-middle mx-auto p-8 mt-24 min-h-screen'>
       <Input onChange={(e)=>{setUsername(e.target.value)}}/>
       <Button className='self-center mx-auto' variant={"outline"} onClick={submitHandler}>{isPending?<LoaderIcon className='animate-spin'/>: <>Set username</> }</Button>
     </div>

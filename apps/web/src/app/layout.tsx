@@ -8,6 +8,7 @@ import { WebSocketInitializer } from "./_components/WsInitializer";
 import { VoiceChannelUI } from "./_components/VoiceChannelUI";
 import { VoiceChatManager } from "./_components/VoiceChatManager";
 import { Toaster } from "@/components/ui/sonner";
+import LogoHeader from "./_components/LogoHeader";
 
 import { Providers } from "./providers";
 
@@ -27,12 +28,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body>
+      <body className='dark'>
         <TRPCReactProvider>
           <WebSocketInitializer />
           <VoiceChatManager />
           <VoiceChannelUI />
-          <Providers>{children}</Providers>
+          <Providers>
+            <LogoHeader/>
+            {children}</Providers>
           <Toaster position="top-left" />
         </TRPCReactProvider>
       </body>
