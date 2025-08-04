@@ -4,7 +4,6 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import { WebSocketInitializer } from "./_components/WsInitializer";
 import { VoiceChannelUI } from "./_components/VoiceChannelUI";
 import { VoiceChatManager } from "./_components/VoiceChatManager";

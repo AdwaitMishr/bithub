@@ -2,10 +2,34 @@ import SimplePeer from 'simple-peer';
 import { create } from 'zustand';
 import type { Instance as SimplePeerInstance } from 'simple-peer';
 
+// This is the message you send from the client
 export interface ChatMessage {
   senderId: string;
   text: string;
 }
+
+// --- START: New Discriminated Union Types for Server Messages ---
+
+// This defines the shape of the payload for each message type
+interface MessagePayloads {
+  'chat_message': { senderId: string; text: string };
+  'webrtc_initiate': { targetId: string; initiator: boolean };
+  'webrtc_signal': { senderId: string; signal: SimplePeer.SignalData };
+  'user_left': { userId: string };
+}
+
+// This creates a master type for any message from the server.
+// It maps over the keys of MessagePayloads to create a union of all possible message shapes.
+// e.g., { type: 'chat_message', payload: { senderId: string; text: string } } | { type: 'user_left', payload: { userId: string } }
+type ServerMessage = {
+  [K in keyof MessagePayloads]: {
+    type: K;
+    payload: MessagePayloads[K];
+  }
+}[keyof MessagePayloads];
+
+// --- END: New Types ---
+
 
 interface WebSocketState {
   ws: WebSocket | null;
@@ -20,12 +44,13 @@ interface WebSocketState {
   remoteStreams: Map<string, MediaStream>;
   startLocalStream: ()=> Promise<void>;
   addPeer: (targetId: string, initiator: boolean)=>void;
-  handleIncomingSignal: (payload:{senderId: string;signal:any})=>void;
+  handleIncomingSignal: (payload: MessagePayloads['webrtc_signal'])=>void;
   removePeer: (targetId: string)=> void;
   isMuted: boolean;
   toggleMute: ()=>void;
   peerQueue: Array<{targetId:string;initiator:boolean}>;
 }
+
 
 export const useWebSocketStore = create<WebSocketState>((set, get) => ({
   ws: null,
@@ -120,51 +145,58 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           payload: { roomId: "main-floor", playerId: newPlayerId },
         }),
       );
-      socket.onmessage = (event) => {
-      // Log 1: See the raw data from the server
+    };
+    
+    // The onmessage handler is now outside onopen
+    socket.onmessage = (event:MessageEvent<string>) => {
       console.log("1. Raw message received from server:", event.data);
 
       try {
-        const message = JSON.parse(event.data);
-        // Log 2: See the parsed JavaScript object
+        const message: ServerMessage = JSON.parse(event.data) as ServerMessage;
         console.log("2. Parsed message object:", message);
 
         switch (message.type) {
           case 'webrtc_initiate':
-            // Log 3: This is the log we are looking for!
             console.log("3. It's a webrtc_initiate message! Calling addPeer with payload:", message.payload);
+            // TypeScript now knows payload has targetId and initiator
             get().addPeer(message.payload.targetId, message.payload.initiator);
             break;
 
           case 'webrtc_signal':
             console.log("3. It's a webrtc_signal message! Handling signal.");
+            // TypeScript now knows payload has senderId and signal
             get().handleIncomingSignal(message.payload);
             break;
             
           case 'chat_message':
             console.log("3. It's a chat_message! Updating state.");
+             // TypeScript now knows payload has senderId and text
             set((state) => ({ messages: [...state.messages, message.payload] }));
             break;
 
           case 'user_left':
             console.log("3. It's a user_left message! Removing peer.");
+            // TypeScript now knows payload has userId
             get().removePeer(message.payload.userId);
             break;
 
           default:
-            console.log("3. Received unhandled message type:", message.type);
+            // This part helps catch any unexpected message types
+            const exhaustiveCheck: never = message;
+            console.log("3. Received unhandled message type:", exhaustiveCheck);
         }
       } catch (error) {
         console.error("Failed to parse incoming message:", error);
       }
-    };
     };
 
 
     set({ ws: socket });
   },
 
-  disconnect: () => { /* ... */ },
+  disconnect: () => { 
+    get().ws?.close();
+   },
 
   sendChatMessage: (text: string) => {
     const { ws, myPlayerId } = get();

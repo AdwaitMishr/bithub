@@ -9,7 +9,7 @@ export const VoiceChatManager = () => {
 
   // On mount, ask for microphone permission to get the local audio stream.
   useEffect(() => {
-    startLocalStream();
+    void startLocalStream();
   }, [startLocalStream]);
 
   return (
