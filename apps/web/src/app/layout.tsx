@@ -10,6 +10,8 @@ import { VoiceChannelUI } from "./_components/VoiceChannelUI";
 import { VoiceChatManager } from "./_components/VoiceChatManager";
 import { Toaster } from "@/components/ui/sonner";
 
+import { Providers } from "./providers";
+
 export const metadata: Metadata = {
   title: "Bithub",
   description: "Bit-sized socializing",
@@ -31,8 +33,8 @@ export default function RootLayout({
           <WebSocketInitializer />
           <VoiceChatManager />
           <VoiceChannelUI />
-          {children}
-          <Toaster position="top-left"/>
+          <Providers>{children}</Providers>
+          <Toaster position="top-left" />
         </TRPCReactProvider>
       </body>
     </html>

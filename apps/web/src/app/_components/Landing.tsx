@@ -6,9 +6,11 @@ import { useSession } from '@/lib/auth-client';
 const Landing = () => {
     const router = useRouter();
     const session =  useSession();
+    const isAuthenticated = session?.data?.user;
     React.useEffect(()=>{
-        if (!session){
+        if (!isAuthenticated){
             router.push('/auth/sign-in');
+            return;
         }
         if (!session.data?.user.username){
             router.push('/chooseusername');

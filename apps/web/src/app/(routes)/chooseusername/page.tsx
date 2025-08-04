@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 const page = () => {
     const [username, setUsername] = React.useState('');
+    const [isPending, setIsPending] = React.useState(false);
 
     const submitHandler =async ()=>{
         if (!await authClient.isUsernameAvailable({username:username})){
@@ -18,14 +19,15 @@ const page = () => {
 
         const uname = await authClient.updateUser({username:username})
         if (!uname.data){
-            toast.error('An error occured, try changing the username.');
+            toast.error('That username is not available, try changing the username.');
+            return;
         }
         toast.success('Username set successfully. Welcome to bithub');
     }
   return (
-    <div>
+    <div className='flex-col gap-x-4 justify-center items-center align-middle mx-auto p-8 mt-24'>
       <Input onChange={(e)=>{setUsername(e.target.value)}}/>
-      <Button onClick={()=>{}}>Set username</Button>
+      <Button className='self-center mx-auto' variant={"outline"} onClick={submitHandler}>Set username</Button>
     </div>
   )
 }
