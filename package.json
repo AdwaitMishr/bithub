@@ -9,8 +9,6 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.4",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
