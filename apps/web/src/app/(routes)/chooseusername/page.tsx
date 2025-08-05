@@ -12,18 +12,28 @@ import { LoaderIcon } from 'lucide-react';
 const Page = () => {
     const [username, setUsername] = React.useState('');
     const [isPending, setIsPending] = React.useState(false);
+    const session = useSession();
 
     const submitHandler =async ()=>{
       setIsPending(true);
         if (!await authClient.isUsernameAvailable({username:username})){
-            toast.error("Sorry, that username is not available.")
+            toast.error("Sorry, that username is not available.");
+            setIsPending(false);
+            return;
         }
-
+        const cc = session.data?.user.username;
+        if (cc){
+          toast.error('You already have a username. Cannot modify.');
+          setIsPending(false);
+          return;
+        }
         const uname = await authClient.updateUser({username:username})
         if (!uname.data){
             toast.error('That username is not available, try changing the username.');
+            setIsPending(false);
             return;
         }
+        
         toast.success('Username set successfully. Welcome to bithub');
         setIsPending(false);
     }
