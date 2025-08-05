@@ -18,6 +18,7 @@ export function Providers({ children }: { children: ReactNode }) {
             onSessionChange={() => {
                 router.refresh()
             }}
+            providers={["google"]}
             Link={Link}
         >
             {children}

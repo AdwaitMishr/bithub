@@ -22,6 +22,12 @@ export const auth = betterAuth({
           maxAge: 5 * 60,
         },
     },
+    socialProviders :{
+        google:{
+            clientId: env.GOOGLE_CLIENT_ID as string,
+            clientSecret: env.GOOGLE_CLIENT_SECRET as string,
+        },
+    },
     plugins: [ 
         username({
             minUsernameLength: 3,

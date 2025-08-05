@@ -8,3 +8,9 @@ export const authClient = createAuthClient({
 
 export const {useSession} = authClient;
 
+const signIn = async () => {
+    const data = await authClient.signIn.social({
+        provider: "google"
+    })
+}
+
