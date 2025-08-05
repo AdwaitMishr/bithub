@@ -1,6 +1,6 @@
 # Bithub 👾
 
-A 2D metaverse and virtual office where users can walk around, interact with colleagues using proximity voice chat, and join themed rooms for work or play.
+A 2D virtual space where users can walk around, interact with colleagues using proximity voice chat, and join themed rooms for work or play.
 
 ## Key Features
 
