@@ -16,7 +16,6 @@ const Page = () => {
 
     const submitHandler =async ()=>{
       setIsPending(true);
-      console.log(session);
         if (!await authClient.isUsernameAvailable({username:username})){
             toast.error("Sorry, that username is not available.");
             setIsPending(false);
