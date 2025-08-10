@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
 import { Room } from '../game/Room';
 
-const rooms = new Map<string, Room>();
+export const rooms = new Map<string, Room>();
 const clientRooms = new Map<WebSocket, string>();
 
 export const clients = new Map<string,WebSocket>();
@@ -18,14 +18,15 @@ export function handleJoinRoom(ws: any, payload: { roomId: string; playerId: str
 
   const existingPlayerIds = Array.from(room.players.keys());
 
-  room.addPlayer(ws, playerId);
+  // room.addPlayer(ws, playerId);
   clientRooms.set(ws,roomId);
   clients.set(playerId,ws);
 
   ws.roomId = roomId;
   ws.playerId = playerId;
 
-  console.log(`Player ${playerId} joined room ${roomId}. Found ${existingPlayerIds.length} existing players`);
+  console.log(`[Join Room] Associating new connection with playerId: ${ws.playerId}`);
+  room.addPlayer(ws, playerId);
 
   existingPlayerIds.forEach(existingPlayerId=>{
     const existingPlayerSocket = clients.get(existingPlayerId);

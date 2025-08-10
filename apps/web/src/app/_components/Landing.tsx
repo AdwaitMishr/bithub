@@ -28,7 +28,7 @@ const Landing = () => {
       initializePlayer(session.user.username);
     }
 
-  }, [status, session, router, initializePlayer]); // Add all dependencies
+  }, [isPending, session, router, initializePlayer]);
 
   return (
     <div>

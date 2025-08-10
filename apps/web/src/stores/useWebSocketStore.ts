@@ -1,11 +1,17 @@
 import SimplePeer from 'simple-peer';
 import { create } from 'zustand';
 import type { Instance as SimplePeerInstance } from 'simple-peer';
+import { usePlayerStore } from './usePlayerStore';
 
 // This is the message you send from the client
 export interface ChatMessage {
   senderId: string;
   text: string;
+}
+
+interface updateElement {
+    playerId: string,
+    position: {x:number,y:number}
 }
 
 // --- START: New Discriminated Union Types for Server Messages ---
@@ -16,6 +22,7 @@ interface MessagePayloads {
   'webrtc_initiate': { targetId: string; initiator: boolean };
   'webrtc_signal': { senderId: string; signal: SimplePeer.SignalData };
   'user_left': { userId: string };
+  'game_state_update':{updates:updateElement[]};
 }
 
 // This creates a master type for any message from the server.
@@ -49,6 +56,7 @@ interface WebSocketState {
   isMuted: boolean;
   toggleMute: ()=>void;
   peerQueue: Array<{targetId:string;initiator:boolean}>;
+  joinGame: (username: string) => void;
 }
 
 
@@ -137,14 +145,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     const socket = new WebSocket('ws://localhost:8080');
 
     socket.onopen = () => {
-      const newPlayerId = 'user-' + Math.random().toString(16).slice(2);
-      set({ isConnected: true, myPlayerId: newPlayerId }); // Set the user's ID
-      socket.send(
-        JSON.stringify({
-          type: "join_room",
-          payload: { roomId: "main-floor", playerId: newPlayerId },
-        }),
-      );
+      console.log('WebSocket Connected (Zustand)');
+      // It ONLY sets the connection status now. It does not join the room.
+      set({ isConnected: true });
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket Disconnected (Zustand)');
+      set({ isConnected: false, ws: null, myPlayerId: null });
     };
     
     // The onmessage handler is now outside onopen
@@ -178,6 +186,9 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
             console.log("3. It's a user_left message! Removing peer.");
             // TypeScript now knows payload has userId
             get().removePeer(message.payload.userId);
+            break;
+          case 'game_state_update':
+            usePlayerStore.getState().applyServerStateUpdate(message.payload.updates);
             break;
 
           default:
@@ -233,5 +244,19 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       });
       set({isMuted: !isMuted});
     }
-  }
+  },
+  joinGame: (username: string) => {
+    const { ws } = get();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      // Set the player ID in the store to the real username
+      set({ myPlayerId: username });
+      ws.send(
+        JSON.stringify({
+          type: "join_room",
+          payload: { roomId: "main-floor", playerId: username },
+        }),
+      );
+      console.log(`Sent join_room request with username: ${username}`);
+    }
+  },
 }));

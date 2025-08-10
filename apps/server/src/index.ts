@@ -4,6 +4,7 @@ import cors from 'cors';
 
 import {WebSocketServer} from 'ws';
 import { handleConnection } from './websockets/router';
+import { startGameLoop } from './game/gameLoop';
 
 const port = 8080;
 
@@ -18,4 +19,5 @@ wss.on('connection',handleConnection);
 
 server.listen(port,()=>{
     console.log(`Bithub server is running and listening on port:${port}`);
+    startGameLoop();
 })

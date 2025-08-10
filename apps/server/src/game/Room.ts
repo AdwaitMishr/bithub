@@ -1,11 +1,14 @@
 import {WebSocket} from 'ws';
 
+export type Direction = 'up' | 'down' | 'left' | 'right';
+
 interface PlayerState {
     x: number;
     y: number;
 
     variant?: number | null;
     nickname?: string | null;
+    lastIntent?: Direction;
 }
 
 const defaultSpawnPoint = {x:100,y:100};
@@ -18,7 +21,7 @@ export class Room{
 
     addPlayer(ws: WebSocket,playerId:string){
         this.clients.add(ws);
-        this.players.set(playerId,defaultSpawnPoint)
+        this.players.set(playerId,{...defaultSpawnPoint})
     }
 
     removePlayer(ws: WebSocket,playerId:string){

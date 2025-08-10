@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import { handleJoinRoom, leaveRoom } from './rooms';
 import { handleChatMessage } from './handlers/chatHandler';
 import { relaySignal } from './handlers/webrtcHandler';
+import { handleMoveIntent } from './handlers/moveIntentHandler';
 
 
 export function handleConnection(ws: any) {
@@ -31,10 +32,9 @@ export function handleConnection(ws: any) {
         case 'webrtc_signal':
           relaySignal(ws.playerId, payload)
           break;
-        // case 'move_intent':
-        //   handleMoveIntent(ws, payload);
-        //   break;
-
+        case 'move_intent':
+          handleMoveIntent(ws,payload);
+          break;
         default:
           console.log(`Unknown message type: ${type}`);
       }
